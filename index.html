@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriPrep 360° — Plataforma Modular de Estudos &amp; ENARE</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- TOP NAVBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">N</div>
+      <div>
+        <h1 class="brand-title">NutriPrep <span>360°</span></h1>
+        <p class="brand-sub">Sistema Modular • Faculdade &amp; Residência ENARE</p>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <button type="button" id="themeToggle" class="theme-toggle" aria-label="Alternar tema claro e escuro" title="Alternar tema claro / escuro">
+        <span id="themeSun" class="theme-toggle-opt active" aria-hidden="true">☀</span>
+        <span id="themeMoon" class="theme-toggle-opt" aria-hidden="true">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SELETOR DE MÓDULOS EM CHIPS + ABAS PILL -->
+  <div class="module-strip-wrap">
+    <div id="moduleChips" class="module-chips" role="group" aria-label="Selecionar módulo de estudo"></div>
+
+    <nav class="subnav" role="tablist" aria-label="Modos de estudo">
+      <button type="button" role="tab" aria-selected="true" id="tab-questoes" class="tab-btn active" data-tab="questoes">
+        📝 Questões &amp; Cascata
+      </button>
+      <button type="button" role="tab" aria-selected="false" id="tab-adipometro" class="tab-btn" data-tab="adipometro">
+        ⏱️ Simulador de Adipômetro
+      </button>
+      <button type="button" role="tab" aria-selected="false" id="tab-pratica" class="tab-btn" data-tab="pratica">
+        🩺 Estação Prática (ISAK)
+      </button>
+      <button type="button" role="tab" aria-selected="false" id="tab-calculadora" class="tab-btn" data-tab="calculadora">
+        🧮 Conferência de Fórmulas
+      </button>
+      <button type="button" role="tab" aria-selected="false" id="tab-importador" class="tab-btn" data-tab="importador">
+        ➕ Gerenciar &amp; Importar (JSON)
+      </button>
+    </nav>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="container">
+
+    <!-- ABA 1: QUESTÕES & CASCATA -->
+    <section id="view-questoes" class="view" aria-labelledby="tab-questoes">
+      <div class="section-header">
+        <div>
+          <h2 id="moduleTitle" class="section-title">01. Avaliação Nutricional</h2>
+          <p id="moduleSubtitle" class="section-sub">Antropometria, composição corporal, ISAK, ciclos de vida e cálculos em cascata.</p>
+        </div>
+        <div class="toolbar-group">
+          <span id="scoreBadge" class="badge badge-emerald">Acertos: 0 / 0 (0%)</span>
+          <span id="wrongBadge" class="badge badge-danger hidden">Erradas: 0</span>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <select id="topicFilter" class="select" aria-label="Filtrar por tópico">
+            <option value="ALL">Todos os tópicos</option>
+          </select>
+          <button type="button" id="btnReviewWrong" class="btn btn-ghost btn-sm" title="Revisar apenas questões erradas neste módulo">
+            🎯 Revisar Erradas
+          </button>
+          <button type="button" id="btnShuffle" class="btn btn-ghost btn-sm" title="Embaralhar ordem das questões">
+            🔀 Embaralhar
+          </button>
+        </div>
+        <div class="toolbar-group">
+          <button type="button" id="btnResetModule" class="btn btn-ghost btn-sm" title="Zerar respostas salvas deste módulo">
+            ↺ Reiniciar Módulo
+          </button>
+        </div>
+      </div>
+
+      <div class="progress-track" aria-label="Progresso no módulo">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+
+      <article id="questionContainer" class="card"></article>
+    </section>
+
+    <!-- ABA 2: SIMULADOR VISUAL DE ADIPÔMETRO ANALÓGICO -->
+    <section id="view-adipometro" class="view hidden" aria-labelledby="tab-adipometro">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Simulador de Adipômetro Analógico Científico</h2>
+          <p class="section-sub">Treine leitura precisa (ponteiro menor = voltas de 10 mm; ponteiro maior = 0 a 10 mm com divisões de 0,2 mm e 0,5 mm).</p>
+        </div>
+        <div class="caliper-stats">
+          <span id="caliperScoreBadge" class="badge badge-emerald">Acertos: 0 / 0</span>
+          <span id="caliperStreakBadge" class="badge badge-amber">Sequência: 0</span>
+        </div>
+      </div>
+
+      <div class="card caliper-layout">
+        <div class="dial-wrap">
+          <svg id="caliperDial" viewBox="0 0 280 280" class="dial-svg" role="img" aria-label="Mostrador analógico de adipômetro científico">
+            <!-- Moldura metálica -->
+            <circle cx="140" cy="140" r="132" fill="#1e1e24" stroke="#3f3f4a" stroke-width="4" />
+            <!-- Fundo do mostrador -->
+            <circle cx="140" cy="140" r="122" fill="#fdfcf9" stroke="#e5dfd3" stroke-width="2" />
+            <!-- Arco de ajuda visual (opcional) -->
+            <path id="dialGuideArc" d="" fill="none" stroke="rgba(244, 196, 48, 0.35)" stroke-width="14" stroke-linecap="butt" class="hidden" />
+            <!-- Marcações externas geradas via JS -->
+            <g id="dialTicks"></g>
+            <!-- Texto superior do mostrador -->
+            <text x="140" y="76" text-anchor="middle" font-size="8.5" font-weight="800" fill="#57534e" letter-spacing="1.2">ADIPÔMETRO 0–50 mm</text>
+            <text x="140" y="88" text-anchor="middle" font-size="7.5" fill="#78716c">1 volta = 10 mm • div = 0,2 mm</text>
+
+            <!-- Sub-mostrador (voltas de 10 mm: 0 a 4) -->
+            <circle cx="140" cy="186" r="32" fill="#f3efe6" stroke="#a8a29e" stroke-width="2" />
+            <g id="subDialTicks"></g>
+            <!-- Ponteiro menor -->
+            <line id="smallHand" x1="140" y1="186" x2="140" y2="162" stroke="#dc2626" stroke-width="3" stroke-linecap="round" />
+            <circle cx="140" cy="186" r="4" fill="#1c1c21" />
+            <!-- Rótulo do sub-mostrador fora do círculo para não sobrepor números -->
+            <text x="140" y="230" text-anchor="middle" font-size="7.5" font-weight="800" fill="#44403c">VOLTAS (×10 mm)</text>
+
+            <!-- Ponteiro maior -->
+            <line id="bigHand" x1="140" y1="140" x2="140" y2="34" stroke="#1c1c21" stroke-width="4" stroke-linecap="round" />
+            <line id="bigHandTail" x1="140" y1="140" x2="140" y2="160" stroke="#1c1c21" stroke-width="4" stroke-linecap="round" />
+            <circle cx="140" cy="140" r="7" fill="#f4c430" stroke="#1c1c21" stroke-width="2" />
+          </svg>
+          <p class="dial-caption">
+            Dica: confira primeiro qual número o <strong>ponteiro vermelho</strong> já ultrapassou (×10 mm) e some à leitura do <strong>ponteiro preto</strong>.
+          </p>
+        </div>
+
+        <div class="view">
+          <div class="toolbar-group">
+            <span class="badge badge-amber">Atenção: Questão em Cascata!</span>
+            <select id="caliperMode" class="select" aria-label="Modo do simulador de adipômetro">
+              <option value="half">Precisão 0,5 mm (Padrão Prova)</option>
+              <option value="fine">Precisão 0,2 mm (Científico Avançado)</option>
+              <option value="cascade">Modo Cascata (Leitura + Cálculo CMB)</option>
+            </select>
+          </div>
+
+          <div id="caliperPromptBox">
+            <h3 class="section-title" style="font-size: 1.1rem;">Qual é a leitura exata deste adipômetro (em mm)?</h3>
+            <p class="section-sub" style="margin-top: 0.35rem;">
+              Leia o ponteiro vermelho (voltas completas de 10 mm) e some ao valor do ponteiro principal. Aceita ponto ou vírgula (ex: <code>14.5</code> ou <code>14,5</code>).
+            </p>
+          </div>
+
+          <div id="cascadeContext" class="card-subtle hidden"></div>
+
+          <div class="caliper-form">
+            <input type="text" inputmode="decimal" id="caliperInput" class="input" style="width: 11rem;" placeholder="Ex: 14,5" aria-label="Valor lido no adipômetro em milímetros" />
+            <input type="text" inputmode="decimal" id="cascadeCmbInput" class="input hidden" style="width: 11rem;" placeholder="CMB (cm) ex: 26,9" aria-label="Valor calculado da CMB em centímetros" />
+            <button type="button" id="btnCheckCaliper" class="btn btn-primary">Verificar</button>
+            <button type="button" id="btnNewCaliper" class="btn btn-secondary">Nova Dobra</button>
+            <button type="button" id="btnToggleDialHint" class="btn btn-ghost btn-sm">💡 Dica Visual</button>
+          </div>
+
+          <div id="caliperFeedback" class="feedback-banner hidden"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 3: ESTAÇÃO PRÁTICA (SORTEIO + CRONÔMETRO + CHECKLIST) -->
+    <section id="view-pratica" class="view hidden" aria-labelledby="tab-pratica">
+      <div class="card view">
+        <div class="section-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+          <div>
+            <h2 class="section-title">Simulador de Prova Prática (Estação ISAK)</h2>
+            <p class="section-sub">Sorteia 4 dobras cutâneas + 1 estação extra. Tente verbalizar o ponto anatômico antes de revelar o gabarito!</p>
+          </div>
+
+          <div class="timer-box">
+            <select id="timerPreset" class="select" aria-label="Tempo da estação">
+              <option value="180">03:00</option>
+              <option value="300" selected>05:00</option>
+              <option value="480">08:00</option>
+              <option value="600">10:00</option>
+            </select>
+            <div id="timerDisplay" class="timer-display" aria-live="polite">05:00</div>
+            <button type="button" id="btnToggleTimer" class="btn btn-secondary btn-sm" disabled>⏸ Pausar</button>
+            <button type="button" id="btnStartStation" class="btn btn-primary">🎲 Sortear Estação</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card-subtle view" style="gap: 0.75rem;">
+            <div class="section-header">
+              <h3 class="q-topic" style="margin: 0;">1. Medidas Sorteadas</h3>
+              <button type="button" id="btnRevealAll" class="btn btn-ghost btn-sm hidden">👁 Revelar Todas</button>
+            </div>
+            <ul id="drawnMeasures" class="measure-list">
+              <li class="measure-item" style="color: var(--text-muted);">
+                Clique em <strong>"Sortear Estação"</strong> para iniciar o sorteio e o cronômetro.
+              </li>
+            </ul>
+          </div>
+
+          <div class="card-subtle view" style="gap: 0.75rem;">
+            <div class="section-header">
+              <h3 class="q-topic" style="margin: 0;">2. Checklist Obrigatório ISAK</h3>
+              <span id="checklistProgress" class="badge">0 / 7</span>
+            </div>
+            <div id="practicalChecklist" class="checklist"></div>
+            <div class="q-footer" style="margin-top: 0.25rem; padding-top: 0.75rem;">
+              <span id="stationsCompletedBadge" class="field-hint">Estações concluídas: 0</span>
+              <button type="button" id="btnCompleteStation" class="btn btn-secondary btn-sm">✓ Registrar Estação Concluída</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 4: CONFERÊNCIA DE FÓRMULAS -->
+    <section id="view-calculadora" class="view hidden" aria-labelledby="tab-calculadora">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Conferência de Fórmulas &amp; Cálculos em Cascata</h2>
+          <p class="section-sub">Confira seus cálculos manuais passo a passo (com conversão de unidades e pontos de corte clínicos).</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Petroski + Siri -->
+        <div class="card">
+          <h3 class="calc-title">Petroski (1995) + Siri (%GC)</h3>
+          <p class="calc-sub">Equação de 4 dobras validada para adultos brasileiros (18–66 anos).</p>
+
+          <div class="grid-2-tight">
+            <div class="field">
+              <label for="calcSex">Protocolo / Sexo</label>
+              <select id="calcSex" class="select">
+                <option value="M">Masculino (4 dobras)</option>
+                <option value="F">Feminino (4 dobras)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="calcAge">Idade (anos)</label>
+              <input type="number" step="1" min="15" max="100" id="calcAge" class="input" placeholder="Ex: 28" />
+            </div>
+            <div class="field">
+              <label for="calcWeight" id="lblWeight">Peso (kg) <span class="field-hint">(opcional H)</span></label>
+              <input type="number" step="0.1" id="calcWeight" class="input" placeholder="Ex: 72.5" />
+            </div>
+            <div class="field">
+              <label for="calcHeight" id="lblHeight">Estatura (cm) <span class="field-hint">(opcional H)</span></label>
+              <input type="number" step="0.1" id="calcHeight" class="input" placeholder="Ex: 175" />
+            </div>
+            <div class="field">
+              <label for="dc1" id="lblDc1">Subescapular (mm)</label>
+              <input type="number" step="0.1" id="dc1" class="input" placeholder="mm" />
+            </div>
+            <div class="field">
+              <label for="dc2" id="lblDc2">Tríceps (mm)</label>
+              <input type="number" step="0.1" id="dc2" class="input" placeholder="mm" />
+            </div>
+            <div class="field">
+              <label for="dc3" id="lblDc3">Suprailíaca (mm)</label>
+              <input type="number" step="0.1" id="dc3" class="input" placeholder="mm" />
+            </div>
+            <div class="field">
+              <label for="dc4" id="lblDc4">Panturrilha Medial (mm)</label>
+              <input type="number" step="0.1" id="dc4" class="input" placeholder="mm" />
+            </div>
+          </div>
+
+          <button type="button" id="btnCalcPetroski" class="btn btn-primary btn-full" style="margin-top: 0.9rem;">
+            Calcular Densidade &amp; %GC
+          </button>
+          <div id="petroskiResult" class="result-box">Preencha as 4 dobras e a idade (e peso/estatura para o protocolo feminino) para conferir o passo a passo.</div>
+        </div>
+
+        <!-- CMB / AMB / AMBc + RCQ -->
+        <div class="card">
+          <h3 class="calc-title">Reserva Muscular (CMB / AMB / AMBc) &amp; RCQ</h3>
+          <p class="calc-sub">Gurney &amp; Jelliffe / Heymsfield (1982) com correção óssea por sexo e risco metabólico (OMS).</p>
+
+          <div class="grid-2-tight">
+            <div class="field" style="grid-column: 1 / -1;">
+              <label for="indicesSex">Sexo (para AMBc e classificação RCQ)</label>
+              <select id="indicesSex" class="select">
+                <option value="M">Masculino (correção -10 cm² | RCQ risco ≥ 0,90)</option>
+                <option value="F">Feminino (correção -6,5 cm² | RCQ risco ≥ 0,85)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="cbVal">Circ. do Braço — CB (cm)</label>
+              <input type="number" step="0.1" id="cbVal" class="input" placeholder="Ex: 30.0" />
+            </div>
+            <div class="field">
+              <label for="pctVal">Prega Tricipital — PCT (mm)</label>
+              <input type="number" step="0.1" id="pctVal" class="input" placeholder="Ex: 10.0" />
+            </div>
+            <div class="field">
+              <label for="cintVal">Cintura (cm)</label>
+              <input type="number" step="0.1" id="cintVal" class="input" placeholder="Ex: 84.0" />
+            </div>
+            <div class="field">
+              <label for="quadVal">Quadril (cm)</label>
+              <input type="number" step="0.1" id="quadVal" class="input" placeholder="Ex: 98.0" />
+            </div>
+          </div>
+
+          <button type="button" id="btnCalcIndices" class="btn btn-primary btn-full" style="margin-top: 0.9rem;">
+            Calcular CMB, AMB, AMBc &amp; RCQ
+          </button>
+          <div id="indicesResult" class="result-box">Os resultados de CMB, AMB, AMBc e RCQ aparecerão aqui com a conversão de unidades exibida.</div>
+        </div>
+      </div>
+
+      <!-- IMC Adulto/Idoso + Perda de Peso Blackburn -->
+      <div class="card">
+        <h3 class="calc-title">IMC (Adulto OMS vs Idoso Lipschitz/SISVAN) &amp; % Perda de Peso (Blackburn)</h3>
+        <p class="calc-sub">Ideal para conferir rapidamente questões de ciclos de vida e triagem nutricional.</p>
+
+        <div class="grid-3">
+          <div class="field">
+            <label for="imcWeight">Peso Atual (kg)</label>
+            <input type="number" step="0.1" id="imcWeight" class="input" placeholder="Ex: 63.0" />
+          </div>
+          <div class="field">
+            <label for="imcHeight">Estatura (cm)</label>
+            <input type="number" step="0.1" id="imcHeight" class="input" placeholder="Ex: 165" />
+          </div>
+          <div class="field">
+            <label for="imcGroup">Ciclo de Vida</label>
+            <select id="imcGroup" class="select">
+              <option value="adulto">Adulto (20–59 anos — OMS)</option>
+              <option value="idoso">Idoso (≥ 60 anos — Lipschitz/SISVAN)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="usualWeight">Peso Usual (kg) <span class="field-hint">(para %PP)</span></label>
+            <input type="number" step="0.1" id="usualWeight" class="input" placeholder="Ex: 70.0" />
+          </div>
+          <div class="field">
+            <label for="lossPeriod">Tempo da Perda</label>
+            <select id="lossPeriod" class="select">
+              <option value="1w">1 semana</option>
+              <option value="1m">1 mês</option>
+              <option value="3m" selected>3 meses</option>
+              <option value="6m">6 meses</option>
+            </select>
+          </div>
+          <div class="field" style="justify-content: flex-end;">
+            <button type="button" id="btnCalcImc" class="btn btn-primary btn-full">Calcular IMC &amp; %PP</button>
+          </div>
+        </div>
+        <div id="imcResult" class="result-box">Preencha Peso Atual + Estatura (para IMC) e/ou Peso Usual (para % Perda de Peso).</div>
+      </div>
+    </section>
+
+    <!-- ABA 5: GERENCIAR & IMPORTAR NOVOS TEMAS (JSON) -->
+    <section id="view-importador" class="view hidden" aria-labelledby="tab-importador">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Expandir Plataforma (Novos Temas &amp; ENARE)</h2>
+          <p class="section-sub">Importe questões em JSON, crie módulos personalizados e exporte seu backup local (salvo automaticamente no navegador).</p>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="stat-card">
+          <div id="statModules" class="stat-value">4</div>
+          <div class="stat-label">Módulos Ativos</div>
+        </div>
+        <div class="stat-card">
+          <div id="statQuestions" class="stat-value">0</div>
+          <div class="stat-label">Questões Totais no Banco</div>
+        </div>
+        <div class="stat-card">
+          <div id="statAnswered" class="stat-value">0</div>
+          <div class="stat-label">Questões Respondidas</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Importar JSON -->
+        <div class="card view" style="gap: 0.85rem;">
+          <h3 class="calc-title" style="margin: 0;">1. Importar Questões via JSON</h3>
+          <div class="field">
+            <label for="importTargetModule">Adicionar no módulo:</label>
+            <select id="importTargetModule" class="select"></select>
+          </div>
+          <div class="field">
+            <label for="jsonInput">Cole o array JSON de questões:</label>
+            <textarea id="jsonInput" rows="8" class="textarea" placeholder='[
+  {
+    "topic": "ENARE - Terapia Nutricional",
+    "tag": "ENARE",
+    "q": "Enunciado da questão...",
+    "options": ["Alternativa A", "Alternativa B", "Alternativa C", "Alternativa D"],
+    "answer": 0,
+    "explanation": "Gabarito comentado..."
+  }
+]'></textarea>
+          </div>
+          <div class="toolbar-group">
+            <button type="button" id="btnImportJson" class="btn btn-primary">Carregar Questões</button>
+            <button type="button" id="btnCopyPrompt" class="btn btn-secondary">📋 Copiar Prompt p/ Gemini / NotebookLM</button>
+          </div>
+          <div id="importFeedback" class="feedback-banner hidden"></div>
+        </div>
+
+        <!-- Criar Novo Módulo + Backup -->
+        <div class="view" style="gap: 1.25rem;">
+          <div class="card view" style="gap: 0.8rem;">
+            <h3 class="calc-title" style="margin: 0;">2. Criar Novo Módulo</h3>
+            <div class="field">
+              <label for="newModuleName">Nome do Módulo</label>
+              <input type="text" id="newModuleName" class="input" placeholder="Ex: 05. Técnica Dietética & UAN" />
+            </div>
+            <div class="field">
+              <label for="newModuleSub">Descrição Curta</label>
+              <input type="text" id="newModuleSub" class="input" placeholder="Ex: Fator de correção, cocção, APPCC e gestão de UAN" />
+            </div>
+            <button type="button" id="btnCreateModule" class="btn btn-primary">➕ Criar Módulo</button>
+          </div>
+
+          <div class="card view" style="gap: 0.8rem;">
+            <h3 class="calc-title" style="margin: 0;">3. Backup &amp; Restauração</h3>
+            <p class="calc-sub" style="margin: 0;">Todo o seu progresso e questões importadas ficam salvos no <code>localStorage</code> deste navegador.</p>
+            <div class="toolbar-group">
+              <button type="button" id="btnExportBackup" class="btn btn-secondary">⬇ Exportar Backup (.json)</button>
+              <button type="button" id="btnFactoryReset" class="btn btn-danger">⚠ Restaurar Padrão</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    NutriPrep 360° • Funciona 100% offline • Progresso salvo automaticamente no navegador
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="data/modules.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
